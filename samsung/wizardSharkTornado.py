@@ -149,7 +149,7 @@ for i in range(repeat): # 방향 변경 횟수
 
     idx += 1
 
-assert curr_idx==(0, 0)
+assert curr_idx==(0, 0)x    
 
 print(answer)
 
