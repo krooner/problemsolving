@@ -18,17 +18,18 @@ def find_cluster(pos, acc):
     return acc
 
 for l in L:
-    interval = pow(2, l)
-    backup = [[0 for _ in range(interval)] for _ in range(interval)]
-    for i in range(0, length, interval):
-        for j in range(0, length, interval):
-            for a in range(interval):
-                for b in range(interval):
-                    backup[a][b] = board[i+interval-b-1][j+a]
+    if l > 0:
+        interval = pow(2, l)
+        backup = [[0 for _ in range(interval)] for _ in range(interval)]
+        for i in range(0, length, interval):
+            for j in range(0, length, interval):
+                for a in range(interval):
+                    for b in range(interval):
+                        backup[a][b] = board[i+interval-b-1][j+a]
 
-            for a in range(interval):
-                for b in range(interval):
-                    board[i+a][j+b] = backup[a][b]
+                for a in range(interval):
+                    for b in range(interval):
+                        board[i+a][j+b] = backup[a][b]
 
     # 3. reduce ice by condition
     backup = [[0 for _ in range(length)] for _ in range(length)]
