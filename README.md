@@ -10,3 +10,5 @@
 - Leetcode (파이썬 알고리즘 인터뷰) 
     - 선형 자료구조 Complete
     - 비선형 자료구조 Ing
+- solved.ac
+    - class 1 ing
