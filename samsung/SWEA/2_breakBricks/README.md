@@ -1,12 +1,22 @@
-# 벽돌 깨기
----
+# [벽돌 깨기](https://swexpertacademy.com/main/code/problem/problemDetail.do?contestProbId=AWXRQm6qfL0DFAUo)
 
-[URL](https://swexpertacademy.com/main/code/problem/problemDetail.do?contestProbId=AWXRQm6qfL0DFAUo)
+## 문제
+구슬을 쏘아 벽돌을 꺠트리는 게임을 하려고 한다. 구슬은 N번만 쏠 수 있고, 벽돌들의 정보는 아래와 같이 $w\times h$ 배열로 주어진다. (0은 빈 공간을 의미하며, 그 외의 숫자는 벽돌을 의미한다.)
 
-### 알아야할 것
+게임의 규칙은 다음과 같다.
+1. 구슬은 좌, 우로만 움직일 수 있어서 항상 맨 위에 있는 벽돌만 깨트릴 수 있다.
+2. 벽돌은 숫자 1-9로 표현되며, 구슬이 명중한 벽돌은 상하좌우로 (벽돌에 적힌 숫자 - 1) 칸 만큼 같이 제거된다.
+3. 제거되는 범위 내에 있는 벽돌은 동시에 제거된다.
+4. 빈 공간이 있을 경우 벽돌은 밑으로 떨어지게 된다.
+
+N개의 벽돌을 떨어트려 최대한 많은 벽돌을 제거하려고 한다. N, W, H 그리고 벽돌 정보가 주어질 때 남은 벽돌의 개수를 구하라.
+
+
+
+## 풀이 방법
 - **2차원 배열 복사는 deepcopy** - `array[:]`로 뻘짓했다.
 
-```
+```python
 from copy import deepcopy
 
 2d_array_copy_wrong = array[:]

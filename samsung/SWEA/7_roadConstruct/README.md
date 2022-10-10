@@ -1,11 +1,11 @@
-# 활주로 건설
----
+# [활주로 건설](https://swexpertacademy.com/main/code/problem/problemDetail.do?contestProbId=AWIeW7FakkUDFAVH)
 
-[URL](https://swexpertacademy.com/main/code/problem/problemDetail.do?contestProbId=AWIeW7FakkUDFAVH)
+## 문제
+... (ing)
 
-### Idea
+## 풀이
 
-[Reference](https://youtu.be/D3LCf9tD9Cs)
+[Reference: YouTube](https://youtu.be/D3LCf9tD9Cs)
 
 연속적으로 높이가 유지되는 길이를 저장한다.
 1. 값이 증가하는 경우 - **현재 값**에 따라 활주로를 사용

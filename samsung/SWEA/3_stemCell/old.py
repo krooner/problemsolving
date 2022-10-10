@@ -46,10 +46,3 @@ for t in range(T):
                 answer += 1
     
     print(f"#{t+1} {answer}")
-
-
-    
-
-
-
-
