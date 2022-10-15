@@ -1,66 +1,88 @@
-dr = [-1, 0, 1, 0]; dc = [0, 1, 0, -1]
+dr = [-1, 0, 1, 0]
+dc = [0, 1, 0, -1]
 
 N, Q = list(map(int, input().split()))
-length = pow(2, N)
-board = [list(map(int, input().split())) for _ in range(length)]
-visited = [[False for _ in range(length)] for _ in range(length)]
-
+big_len = pow(2, N)
+A = []
+for _ in range(big_len):
+    row = list(map(int, input().split()))
+    A.append(row)
 L = list(map(int, input().split()))
 
-def find_cluster(pos, acc):
-    r, c = pos
-    for i in range(4):
-        rr, cc = r + dr[i], c + dc[i]
-        if 0<=rr<length and 0<=cc<length and visited[rr][cc] == False and board[rr][cc] > 0:
-            visited[rr][cc] = True
-            cnt = find_cluster((rr, cc), acc+1)
-            acc = max(cnt, acc)
-    return acc
+# 1) 부분격자를 시계방향 90도 회전
+# 2) 인접한 4칸 중, 얼음이 있는 칸이 2칸 이하인 경우 얼음의 양 1 차감
+for q in range(Q):
+    part_len = pow(2, L[q])
+    B = [[0 for _ in range(big_len)] for _ in range(big_len)]
+    if part_len > 1:
+        for r in range(0, big_len, part_len):
+            for c in range(0, big_len, part_len):
 
-for l in L:
-    if l > 0:
-        interval = pow(2, l)
-        backup = [[0 for _ in range(interval)] for _ in range(interval)]
-        for i in range(0, length, interval):
-            for j in range(0, length, interval):
-                for a in range(interval):
-                    for b in range(interval):
-                        backup[a][b] = board[i+interval-b-1][j+a]
+                for a in range(part_len): # row
+                    for b in range(part_len):
+                        curr_r = r+a
+                        curr_c = c+b
 
-                for a in range(interval):
-                    for b in range(interval):
-                        board[i+a][j+b] = backup[a][b]
+                        rotate_r = r+b
+                        rotate_c = c+part_len-1-a
 
-    # 3. reduce ice by condition
-    backup = [[0 for _ in range(length)] for _ in range(length)]
+                        B[rotate_r][rotate_c] = A[curr_r][curr_c]
+    
+    for r in range(big_len):
+        for c in range(big_len):
+            count = 0
 
-    for i in range(length):
-        for j in range(length):
-            if board[i][j] == 0:
-                continue
-            cnt = 0
             for k in range(4):
-                rr, cc = i + dr[k], j + dc[k]
-                if 0<=rr<length and 0<=cc<length and board[rr][cc] > 0:
-                    cnt += 1
-            if cnt < 3:
-                backup[i][j] = board[i][j] - 1
+                rr = r + dr[k]
+                cc = c + dc[k]
+                if rr < 0 or rr >= big_len or cc < 0 or cc >= big_len:
+                    continue
+                if B[rr][cc] == 0:
+                    continue
+                count += 1
+            
+            if count >= 3 or B[r][c] == 0:
+                continue
             else:
-                backup[i][j] = board[i][j]
-    board = backup
+                B[r][c] -= 1
 
-answer = 0
-max_cells = 0
 
-for i in range(length):
-    for j in range(length):
-        if board[i][j] > 0:
-            answer += board[i][j]
-            if visited[i][j] == False:
-                visited[i][j] = True
-                cells = find_cluster((i, j), 1)
-                max_cells = max(max_cells, cells)
+    # A = deepcopy(B)
+    A = B
 
-print(answer)
-print(max_cells)
+# from collections import deque
 
+ice_sum = 0
+for r in range(big_len):
+    for c in range(big_len):
+        if A[r][c] > 0:
+            ice_sum += A[r][c]
+
+max_counts = 0
+for r in range(big_len):
+    for c in range(big_len):
+        if A[r][c] > 0:
+            counts = 1
+            dq = [(r, c)]
+            A[r][c] = -1
+            while True:
+                if len(dq) == 0:
+                    break
+                for _ in range(len(dq)):
+                    pr, pc = dq.pop()
+                    
+                    for i in range(4):
+                        rr = pr + dr[i]
+                        cc = pc + dc[i]
+
+                        if rr < 0 or rr >= big_len or cc < 0 or cc >= big_len:
+                            continue
+                        if A[rr][cc] > 0:
+                            counts += 1
+                            A[rr][cc] = -1
+                            dq.append((rr, cc))
+            
+            max_counts = max(counts, max_counts)
+
+print(ice_sum)
+print(max_counts)
