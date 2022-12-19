@@ -1,13 +1,10 @@
 # [DeepETA: How Uber Predicts Arrival Times Using Deep Learning](https://www.uber.com/en-KR/blog/deepeta-how-uber-predicts-arrival-times/)
 
-딥러닝을 활용하여 도착 시간을 예측하기
-- ETA (Estimated Time Arrival, 예상 도착 시간)
+딥러닝을 활용한 ETA (Estimated Time Arrival, 예상 도착 시간) 예측
 
 ![image-1](https://blog.uber-cdn.com/cdn-cgi/image/width=1250,quality=80,onerror=redirect,format=auto/wp-content/uploads/2022/02/cover_figure.png)
 
 정확한 ETA는 소비자 경험을 좌우함.
-
-ETA의 용도
 - 요금 계산
 - 픽업 시간 추정
 - 라이더 배정
@@ -111,6 +108,61 @@ DeepETA 모델은
 
 Post-processing models은 출발지와 도착지 정보를 위도와 경도 (latitudes and longitudes)로 받는다.
 
-(...)
+ETA 예측에 있어 출발지와 도착지는 매우 중요하므로, DeepETA에서는 다른 Continuous features과는 다르게 Encoding했음.
+
+위치 데이터는 균일하지 않게 분포되어 있고, 여러가지의 공간 해상도 (spatial resolutions) 정보를 가지고 있다.
+
+위도와 경도에 따라 위치는 여러 개의 해상도 그리드 (resolution grids) 로 quantize (Continuous한 값을 유한한 discrete value로 맵핑)
+
+해상도를 높일 수록 grid cell의 수는 기하급수적으로 증가하고 cell당 데이터 정보는 감소하게 된다.
+
+1. Exact indexing: 각 grid cell을 지정된 (dedicated) embedding에 맵핑
+    - 가장 많은 Space를 차지함
+2. Feature hashing: hash function을 이용하여, 각 grid cell을 작은 갯수의 bins으로 맵핑
+    - Exact indexing보다는 적은 bin을 가짐
+    - 정확도는 grid의 해상도에 따라 같거나 약간 안 좋은 정도 (정보 손실을 야기하는 hash collision 때문일 것)
+3. Multiple feature hashing: 독립적인 hash function을 사용하여 각 grid cell을 여러 개의 작은 갯수의 bins로 맵핑
+    - 가장 좋은 정확도와 latency를 보이면서 Space를 절약
+    - single-bucket일 때의 collision 문제를 해결하기 위해 독립적인 여러 개의 hash bucket으로부터 정보를 결합함
 
 ![image-6](https://blog.uber-cdn.com/cdn-cgi/image/width=2160,quality=80,onerror=redirect,format=auto/wp-content/uploads/2022/08/figure5-1.png)
+
+## How We Made It Fast
+
+### Fast Transformer
+linear transformer - attention matrix를 계산하는 대신 kernel trick을 사용
+
+### More Embeddings, Fewer Layers
+좌표를 quantize하고 hash lookup을 적용하여 $O(1)$ time이 소요된다.
+
+트리 구조로 Embedding을 저장하는 경우 $O(\log N)$의 lookup time이 소요되지만, FC-layer로 같은 Mapping을 학습시키는 경우 $O(N^2)$의 lookup time이 소요된다.
+
+학습 과정에서 Embedding table 형태로 partial answer를 미리 계산해둠으로써 Serving time에 필요한 연산량을 감소
+
+## How We Made It General
+
+![image-7](https://blog.uber-cdn.com/cdn-cgi/image/width=2160,quality=80,onerror=redirect,format=auto/wp-content/uploads/2022/08/figure6.png)
+
+### Bias Adjustment Decoder
+각각 다른 Segment에 대한 Raw prediction 결과를 조정하여 MAE를 개선한다.
+
+Multi-task decoder를 사용하기에는 latency 제약이 있어 제외함
+### Asymmetric Huber Loss
+예를 들어 요금 계산을 위한 평균 ETA를 추정하면서, Outlier effect를 제어하고자 한다.
+
+Asymmetric Huber Loss는 Outlier에 robust하고 자주 사용되는 point estimates를 지원한다.
+
+![image-8](https://blog.uber-cdn.com/cdn-cgi/image/width=2160,quality=80,onerror=redirect,format=auto/wp-content/uploads/2022/08/figure7.gif)
+
+## How We Train and Serve the Model
+
+우버의 ML Platform인 Michelangelo의 Canvas framework로 모델을 학습 및 배포함
+
+![image-9](https://blog.uber-cdn.com/cdn-cgi/image/width=2160,quality=80,onerror=redirect,format=auto/wp-content/uploads/2022/08/figure8.png)
+
+우버 사용자의 요청은 다양한 서비스를 통해 uRoute service로 전해진다
+- uRoute service는 모든 routing lookups에 대한 FE 역할을 한다.
+- Route-line 및 ETA 계산을 위해 Routing engine으로 요청을 전달한다.
+- ETA 및 다른 모델의 Feature를 활용하여 Michelangelo Online Prediction Service에 요청하여 DeepETA 모델로부터 예측을 얻는다.
+
+![image-10](https://blog.uber-cdn.com/cdn-cgi/image/width=2160,quality=80,onerror=redirect,format=auto/wp-content/uploads/2022/08/figure9.png)
