@@ -5,7 +5,7 @@
 - [x] ~~Baekjoon: SW역량 테스트 기출 Ing~~
 - [] Programmers:
     - [x] ~~Level 0~~
-    - [] Level 1 Working
+    - [x] ~~Level 1~~
     - [] Level 2 Working
 - [] Leetcode
     - [] 선형 자료구조 Complete
