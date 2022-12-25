@@ -1,5 +1,6 @@
-.plist
-.json
-.dSYM
-.vscode/
-.DS_Store
+*.zip
+*.csv
+*.txt
+.ipynb_checkpoints/
+
+myvenv/
