@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 test () {
     mkdir "$1"
